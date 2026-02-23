@@ -1,4 +1,4 @@
-﻿
+﻿using Microsoft.EntityFrameworkCore;
 using ToDoWebApiApp.Data;
 using ToDoWebApiApp.Models;
 
@@ -13,12 +13,17 @@ namespace ToDoWebApiApp.Repository
             _db = db;
         }
 
-        public Task<TaskClass> AddTaskAsync(TaskClass task)
+        public async Task<TaskClass> AddTaskAsync(TaskClass task)
         {
-            _db.Add(task);
-            _db.SaveChangesAsync();
-            return Task.FromResult(task);
+            await _db.Todos.AddAsync(task);
+            await _db.SaveChangesAsync();
+            return task;
         }
 
+        public async Task<List<TaskClass>> getAllTasks()
+        {
+            List<TaskClass> taskClasses = await _db.Todos.ToListAsync();
+            return taskClasses;
+        }
     }
 }

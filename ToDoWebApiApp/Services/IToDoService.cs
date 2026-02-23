@@ -4,6 +4,7 @@ namespace ToDoWebApiApp.Services
 {
     public interface IToDoService
     {
-        TaskClass saveTask(TaskClass task);
+        Task<List<TaskClass>> getAllTasks();
+        Task<TaskClass> saveTask(TaskClass task);
     }
 }

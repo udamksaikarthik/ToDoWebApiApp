@@ -1,4 +1,5 @@
-﻿using ToDoWebApiApp.Data;
+﻿using System.Threading.Tasks;
+using ToDoWebApiApp.Data;
 using ToDoWebApiApp.Models;
 using ToDoWebApiApp.Repository;
 
@@ -13,9 +14,14 @@ namespace ToDoWebApiApp.Services
             _iToDoRepository = iToDoRepository;
         }
 
-        public TaskClass saveTask(TaskClass task)
+        public async Task<List<TaskClass>> getAllTasks()
         {
-            return _iToDoRepository.AddTaskAsync(task).Result;
+            return await _iToDoRepository.getAllTasks();
+        }
+
+        public async Task<TaskClass> saveTask(TaskClass task)
+        {
+            return await _iToDoRepository.AddTaskAsync(task);
         }
     }
 }
