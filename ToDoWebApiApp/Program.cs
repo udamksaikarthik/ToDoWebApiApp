@@ -1,3 +1,8 @@
+using Microsoft.EntityFrameworkCore;
+using ToDoWebApiApp.Data;
+using ToDoWebApiApp.Repository;
+using ToDoWebApiApp.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -5,6 +10,16 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite("Data Source=todos.db"));
+
+builder.Services.AddScoped<IToDoService, ToDoServiceImpl>();
+
+builder.Services.AddScoped<IToDoRepository, ToDoRepositoryImpl>();
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
 
