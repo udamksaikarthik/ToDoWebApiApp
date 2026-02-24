@@ -32,7 +32,7 @@ namespace ToDoWebApiApp.Controllers
         {
             // Here you would typically add the task to your database
             TaskClass savedTask = await _iToDoService.saveTask(task);
-            return Ok(new { Message = $"Task '{savedTask.Id}' with title: '{savedTask.Title}' added successfully!" });
+            return Ok(savedTask);
         }
 
         // DELETE: /api/ToDo/deleteTask/{id}
