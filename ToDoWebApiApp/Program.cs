@@ -40,6 +40,8 @@ builder.Services.AddScoped<IToDoRepository, ToDoRepositoryImpl>();
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Configure ASP.NET Core Identity (user + role store, password policy).
+// Identity writes users/roles to AppDbContext-backed tables (AspNetUsers, AspNetRoles, etc.).
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 {
     options.Password.RequireDigit = false;
@@ -50,6 +52,8 @@ builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 }).AddEntityFrameworkStores<AppDbContext>()
   .AddDefaultTokenProviders();
 
+// Configure JWT bearer authentication as the default auth scheme for every request.
+// API clients must send: Authorization: Bearer <token>
 builder.Services.AddAuthentication(options =>
     {
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -57,6 +61,8 @@ builder.Services.AddAuthentication(options =>
         options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
     }).AddJwtBearer(options =>
     {
+        // Validate incoming JWTs with issuer/signing key/lifetime checks.
+        // If token is invalid/expired, request is treated as unauthenticated.
         options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
         {
             ValidateIssuer = true,
@@ -70,6 +76,8 @@ builder.Services.AddAuthentication(options =>
         };
     });
 
+// Authorization policies based on roles embedded in JWT claims.
+// These can be used with [Authorize(Policy = "AdminPolicy")] etc.
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminPolicy", policy =>
@@ -94,10 +102,27 @@ app.UseHttpsRedirection();
 
 app.UseCors(FrontendCorsPolicy);
 
+// 1) Authenticate first: read token and build HttpContext.User.
 app.UseAuthentication();
 
+// 2) Authorize second: enforce [Authorize] attributes/policies.
 app.UseAuthorization();
 
 app.MapControllers();
+
+// Seed required application roles once at startup so public role-management endpoints are unnecessary.
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var rolesToSeed = new[] { "Admin", "User" };
+
+    foreach (var roleName in rolesToSeed)
+    {
+        if (!await roleManager.RoleExistsAsync(roleName))
+        {
+            await roleManager.CreateAsync(new IdentityRole(roleName));
+        }
+    }
+}
 
 app.Run();
