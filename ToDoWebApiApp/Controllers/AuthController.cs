@@ -13,9 +13,7 @@ namespace ToDoWebApiApp.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        // Identity services:
-        // - UserManager handles user CRUD, password hashing/verification, user-role lookup.
-        // - RoleManager handles role CRUD.
+        // Identity service for user CRUD, password hashing/verification, and role assignment.
         private readonly UserManager<IdentityUser> _userManager;
         private readonly IConfiguration _configuration;
 
